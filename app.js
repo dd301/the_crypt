@@ -34,21 +34,30 @@ var spacer = {
       boxText += spacer.line(length, character) + spacer.newLine();
       return boxText;
     }
-  };
+};
   
-  var getPlayerName = function (player) {
+var getPlayerName = function (player) {
     return player.name;
-  };
+};
   
-  var getPlayerHealth = function (player) {
+var getPlayerHealth = function (player) {
     return player.name + " has health " + player.health;
-  };
+};
   
-  var getPlayerPlace = function (player) {
+var getPlayerPlace = function (player) {
     return player.name + " is in " + player.place;
-  };
+};
   
-  var getPlayerInfo = function (player, character) {  
+var getPlayerItems = function (player){
+    var itemsString = "Items:" + spacer.newLine();
+
+    player.items.forEach(function(item){
+        itemsString += "  - " + item + spacer.newLine();
+    });
+    return itemsString;
+}  
+  
+var getPlayerInfo = function (player, character) {  
     var place = getPlayerPlace(player);
     var health = getPlayerHealth(player);
     var longest = Math.max(place.length, health.length) + 4;
@@ -57,22 +66,30 @@ var spacer = {
     info += spacer.wrap(place, longest, character);
     info += spacer.newLine() + spacer.wrap(health, longest, character);
     info += spacer.newLine() + spacer.line(longest, character);
+    
+    info += spacer.newLine();
+    info += " " + getPlayerItems(player);
+    info += spacer.newLine();
+    info += spacer.line(longest, character);
+    
     info += spacer.newLine();
   
     return info;
-  };
+};
+
+var showPlayerInfo = function (player, character){
+    console.log(getPlayerInfo(player, character));
+};
   
-  var player1 = {
+var player1 = {
     name: "Kandra",
     place: "The Dungeon of Doom",
-    health: 50
-  };
+    health: 50,
+    items : ["a trusty lamp"]
+};
   
-  var player2 = {
-    name: "Dax",
-    place: "Limbo",
-    health: 40
-  };
-  
-  console.log(getPlayerInfo(player1, "="));
-  console.log(getPlayerInfo(player2, "+"));
+showPlayerInfo(player1, "=");
+
+player1.items.push("a rusty key");
+
+showPlayerInfo(player1, "*");
