@@ -1,3 +1,5 @@
+// the spacer namespace
+
 var spacer = {
     blank: function () {
       return "";
@@ -35,61 +37,142 @@ var spacer = {
       return boxText;
     }
 };
-  
-var getPlayerName = function (player) {
-    return player.name;
-};
-  
-var getPlayerHealth = function (player) {
-    return player.name + " has health " + player.health;
-};
-  
-var getPlayerPlace = function (player) {
-    return player.name + " is in " + player.place;
-};
-  
-var getPlayerItems = function (player){
-    var itemsString = "Items:" + spacer.newLine();
 
-    player.items.forEach(function(item){
-        itemsString += "  - " + item + spacer.newLine();
-    });
-    return itemsString;
-}  
+// the place constructor
+
+var Place = function (title, description) {
+    var newLine = spacer.newLine();
   
-var getPlayerInfo = function (player, character) {  
-    var place = getPlayerPlace(player);
-    var health = getPlayerHealth(player);
-    var longest = Math.max(place.length, health.length) + 4;
+    this.title = title;
+    this.description = description;
+    this.items = [];
+    this.exits = [];
   
-    var info = spacer.box(getPlayerName(player), longest, character);
-    info += spacer.wrap(place, longest, character);
-    info += spacer.newLine() + spacer.wrap(health, longest, character);
-    info += spacer.newLine() + spacer.line(longest, character);
+    this.getItemsInfo = function () {
+        var itemsString = "Items: " + newLine;
+        this.items.forEach(function (item) {
+            itemsString += "   - " + item;
+            itemsString += newLine;
+        });
+        return itemsString;
+    };
+  
+    this.getExitsInfo = function () {
+        var exitsString = "Exits from " + this.title;
+        exitsString += ":" + newLine;
+        
+        this.exits.forEach(function (exit) {
+            exitsString += "   - " + exit.title;
+            exitsString += newLine;
+        });
+      
+        return exitsString;
+    };
+
+    this.getTitleInfo = function () {
+        return spacer.box(
+            this.title,
+            this.title.length + 4,
+            "="
+        );
+    };
+
+    this.getInfo = function () {
+        var infoString = this.getTitleInfo();
+        infoString += this.description;
+        infoString += newLine + newLine;
+        infoString += this.getItemsInfo() + newLine;
+        infoString += this.getExitsInfo();
+        infoString += spacer.line(40, "=") + newLine;
+        return infoString;
+    };
+
+  
+    this.showInfo = function () {
+        console.log(this.getInfo());
+    };
+
+    this.addItem = function (item) {
+        this.items.push(item);
+    };
+  
+    this.addExit = function (exit) {
+        this.exits.push(exit);
+    };
+};
+
+
+
+// the player constructor
+  
+var Player = function (name, health) {
+    var newLine = spacer.newLine();
     
-    info += spacer.newLine();
-    info += " " + getPlayerItems(player);
-    info += spacer.newLine();
-    info += spacer.line(longest, character);
-    
-    info += spacer.newLine();
+    this.name = name;
+    this.health = health;
+    this.items = [];
+    this.place = null;
   
-    return info;
-};
-
-var showPlayerInfo = function (player, character){
-    console.log(getPlayerInfo(player, character));
+    this.addItem = function (item) {
+      this.items.push(item);
+    };
+  
+    this.getNameInfo = function () {
+      return this.name;
+    };
+  
+    this.getHealthInfo = function () {
+      return this.name + " has health " + this.health;
+    };
+  
+    this.getPlaceInfo = function () {
+      return this.name + " is in " + this.place.title;
+    };
+  
+    this.getItemsInfo = function () {
+      var itemsString = "Items:" + newLine;
+         
+      this.items.forEach(function (item, i) {
+        itemsString += "   - " + item + newLine;
+      });
+  
+      return itemsString;
+    };
+  
+    this.getInfo = function (character) {  
+      var place = this.getPlaceInfo();
+      var health = this.getHealthInfo();
+      var longest = Math.max(place.length, health.length) + 4;
+  
+      var info = spacer.box(this.getNameInfo(), longest, character);
+      info += spacer.wrap(place, longest, character);
+      info += spacer.newLine() + spacer.wrap(health, longest, character);
+      info += newLine + spacer.line(longest, character);
+  
+      info += newLine;
+      info += "  " + this.getItemsInfo();
+      info += newLine;
+      info += spacer.line(longest, character);
+      info += newLine;
+  
+      return info;
+    }; 
+  
+    this.showInfo = function (character) {
+      console.log(this.getInfo(character));
+    };
 };
   
-var player1 = {
-    name: "Kandra",
-    place: "The Dungeon of Doom",
-    health: 50,
-    items : ["a trusty lamp"]
-};
-  
-showPlayerInfo(player1, "=");
+// testing player
 
-player1.items.push("a rusty key");
+var library = new Place(
+    "The Old Library",
+    "You are in a library. Dusty books line the walls."
+);
 
-showPlayerInfo(player1, "*");
+var player1 = new Player("Kandra", 50);
+player1.place = library;
+player1.addItem("a rusty key");
+player1.addItem("The Sword of Doom");
+
+player1.showInfo("=");
