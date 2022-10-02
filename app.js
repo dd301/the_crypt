@@ -46,9 +46,9 @@ var Place = function (title, description) {
     this.title = title;
     this.description = description;
     this.items = [];
-    this.exits = [];
+    this.exits = {};
   
-    this.getItemsInfo = function () {
+    this.getItems = function () {
         var itemsString = "Items: " + newLine;
         this.items.forEach(function (item) {
             itemsString += "   - " + item;
@@ -57,19 +57,19 @@ var Place = function (title, description) {
         return itemsString;
     };
   
-    this.getExitsInfo = function () {
+    this.getExits = function () {
         var exitsString = "Exits from " + this.title;
         exitsString += ":" + newLine;
         
-        this.exits.forEach(function (exit) {
-            exitsString += "   - " + exit.title;
+        Object.keys(this.exits).forEach(function (key) {
+            exitsString += "   - " + key;
             exitsString += newLine;
         });
       
         return exitsString;
     };
 
-    this.getTitleInfo = function () {
+    this.getTitle = function () {
         return spacer.box(
             this.title,
             this.title.length + 4,
@@ -78,11 +78,11 @@ var Place = function (title, description) {
     };
 
     this.getInfo = function () {
-        var infoString = this.getTitleInfo();
+        var infoString = this.getTitle();
         infoString += this.description;
         infoString += newLine + newLine;
-        infoString += this.getItemsInfo() + newLine;
-        infoString += this.getExitsInfo();
+        infoString += this.getItems() + newLine;
+        infoString += this.getExits();
         infoString += spacer.line(40, "=") + newLine;
         return infoString;
     };
@@ -96,8 +96,8 @@ var Place = function (title, description) {
         this.items.push(item);
     };
   
-    this.addExit = function (exit) {
-        this.exits.push(exit);
+    this.addExit = function (direction, exit) {
+        this.exits[direction] = exit;
     };
 };
 
@@ -163,16 +163,62 @@ var Player = function (name, health) {
     };
 };
   
-// testing player
+// map
 
+var kitchen = new Place(
+    "The Kitchen",
+    "You are in a kitchen. There is a disturbing smell."
+);
 var library = new Place(
     "The Old Library",
     "You are in a library. Dusty books line the walls."
 );
+var garden = new Place(
+    "The Kitchen Garden",
+    "You are in a small, walled garden."
+);
+var cupboard = new Place(
+    "The Kitchen Cupboard",
+    "You are in a cupboard. It's surprisingly roomy."
+);
 
-var player1 = new Player("Kandra", 50);
-player1.place = library;
-player1.addItem("a rusty key");
-player1.addItem("The Sword of Doom");
+kitchen.addItem("a piece of cheese");
+library.addItem("a rusty key");
+cupboard.addItem("a tin of spam");
 
-player1.showInfo("=");
+kitchen.addExit("south", library);
+kitchen.addExit("west", garden);
+kitchen.addExit("east", cupboard);
+
+library.addExit("north", kitchen);
+garden.addExit("east", kitchen);
+cupboard.addExit("west", kitchen);
+
+// game
+
+var render = function () {
+    console.clear();
+    player.place.showInfo();
+    player.showInfo("*");
+};
+
+var go = function (direction) {
+    player.place = player.place.exits[direction];
+    render();
+    return "";
+};
+
+var get = function (){
+    var item = player.place.items.pop();
+    player.addItem(item);
+    render();
+    return "";
+};
+
+var player = new Player("Kandra", 50);
+player.addItem("The Sword of Doom");
+player.place = kitchen;
+
+// test
+
+render();
