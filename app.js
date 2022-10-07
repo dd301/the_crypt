@@ -1,224 +1,226 @@
-// the spacer namespace
-
-var spacer = {
-    blank: function () {
-      return "";
-    },
+var getGame = function () {
   
-    newLine: function () {
-      return "\n";
-    },
-  
-    line: function (length, character) {
-      var longString = "****************************************";
-      longString += "----------------------------------------";
-      longString += "========================================";
-      longString += "++++++++++++++++++++++++++++++++++++++++";
-      longString += "                                        ";
-  
-      length = Math.max(0, length);
-      length = Math.min(40, length);
-      return longString.substr(longString.indexOf(character), length);
-    },
+    // The spacer namespace
     
-    wrap : function (text, length, character) {
-      var padLength = length - text.length - 3;
-      var wrapText = character + " " + text;      
-      wrapText += spacer.line(padLength, " ");
-      wrapText += character;
-      return wrapText;
-    },
+    var spacer = {
+      blank: function () {
+        return "";
+      },
   
-    box: function (text, length, character) {
-      var boxText = spacer.newLine();
-      boxText += spacer.line(length, character) + spacer.newLine();
-      boxText += spacer.wrap(text, length, character) + spacer.newLine(); 
-      boxText += spacer.line(length, character) + spacer.newLine();
-      return boxText;
-    }
-};
-
-// the place constructor
-
-var Place = function (title, description) {
-    var newLine = spacer.newLine();
+      newLine: function () {
+        return "\n";
+      },
   
-    this.title = title;
-    this.description = description;
-    this.items = [];
-    this.exits = {};
+      line: function (length, character) {
+        var longString = "****************************************";
+        longString += "----------------------------------------";
+        longString += "========================================";
+        longString += "++++++++++++++++++++++++++++++++++++++++";
+        longString += "                                        ";
   
-    this.getItems = function () {
-        var itemsString = "Items: " + newLine;
-        this.items.forEach(function (item) {
-            itemsString += "   - " + item;
-            itemsString += newLine;
-        });
-        return itemsString;
-    };
-  
-    this.getExits = function () {
-        var exitsString = "Exits from " + this.title;
-        exitsString += ":" + newLine;
-        
-        Object.keys(this.exits).forEach(function (key) {
-            exitsString += "   - " + key;
-            exitsString += newLine;
-        });
-      
-        return exitsString;
-    };
-
-    this.getTitle = function () {
-        return spacer.box(
-            this.title,
-            this.title.length + 4,
-            "="
-        );
-    };
-
-    this.getInfo = function () {
-        var infoString = this.getTitle();
-        infoString += this.description;
-        infoString += newLine + newLine;
-        infoString += this.getItems() + newLine;
-        infoString += this.getExits();
-        infoString += spacer.line(40, "=") + newLine;
-        return infoString;
-    };
-
-  
-    this.showInfo = function () {
-        console.log(this.getInfo());
-    };
-
-    this.addItem = function (item) {
-        this.items.push(item);
-    };
-  
-    this.addExit = function (direction, exit) {
-        this.exits[direction] = exit;
-    };
-};
-
-
-
-// the player constructor
-  
-var Player = function (name, health) {
-    var newLine = spacer.newLine();
+        length = Math.max(0, length);
+        length = Math.min(40, length);
+        return longString.substr(longString.indexOf(character), length);
+      },
     
-    this.name = name;
-    this.health = health;
-    this.items = [];
-    this.place = null;
+      wrap : function (text, length, character) {
+        var padLength = length - text.length - 3;
+        var wrapText = character + " " + text;      
+        wrapText += spacer.line(padLength, " ");
+        wrapText += character;
+        return wrapText;
+      },
   
-    this.addItem = function (item) {
-      this.items.push(item);
+      box: function (text, length, character) {
+        var boxText = spacer.newLine();
+        boxText += spacer.line(length, character) + spacer.newLine();
+        boxText += spacer.wrap(text, length, character) + spacer.newLine(); 
+        boxText += spacer.line(length, character) + spacer.newLine();
+        return boxText;
+      }
     };
   
-    this.getNameInfo = function () {
-      return this.name;
-    };
   
-    this.getHealthInfo = function () {
-      return this.name + " has health " + this.health;
-    };
+    // Constructors
   
-    this.getPlaceInfo = function () {
-      return this.name + " is in " + this.place.title;
-    };
+    var Player = function (name, health) {
+      var newLine = spacer.newLine();
+      var items = [];
+      var place = null;
   
-    this.getItemsInfo = function () {
-      var itemsString = "Items:" + newLine;
+      var getNameInfo = function () {
+          return name;
+      };
+  
+      var getHealthInfo = function () {
+          return "(" + health + ")";
+      };
+  
+      var getItemsInfo = function () {
+          var itemsString = "Items:" + newLine;
          
-      this.items.forEach(function (item, i) {
-        itemsString += "   - " + item + newLine;
-      });
+          items.forEach(function (item, i) {
+              itemsString += "   - " + item + newLine;
+          });
   
-      return itemsString;
+          return itemsString;
+      };
+    
+      var getTitleInfo = function () {
+          return getNameInfo() + " " + getHealthInfo();
+      };
+  
+      var getInfo = function () {
+          var info = spacer.box(getTitleInfo(), 40, "*");
+          info += "  " + getItemsInfo();
+          info += spacer.line(40, "*");
+          info += newLine;
+  
+          return info;
+      }; 
+  
+      this.addItem = function (item) {
+          items.push(item);
+      };
+    
+      this.setPlace = function (destination) {
+          place = destination;
+      };
+      
+      this.getPlace = function () {
+          return place;
+      };
+  
+      this.showInfo = function (character) {
+          console.log(getInfo(character));
+      };
     };
   
-    this.getInfo = function (character) {  
-      var place = this.getPlaceInfo();
-      var health = this.getHealthInfo();
-      var longest = Math.max(place.length, health.length) + 4;
+    var Place = function (title, description) {
+      var newLine = spacer.newLine();
+      var items = [];
+      var exits = {};
+    
+      var getItemsInfo = function () {
+          var itemsString = "Items: " + newLine;
+          items.forEach(function (item) {
+              itemsString += "   - " + item;
+              itemsString += newLine;
+          });
+          return itemsString;
+      };
+    
+      var getExitsInfo = function () {
+          var exitsString = "Exits from " + title;
+          exitsString += ":" + newLine;
+          
+          Object.keys(exits).forEach(function (key) {
+              exitsString += "   - " + key;
+              exitsString += newLine;
+          });
+        
+          return exitsString;
+      };
   
-      var info = spacer.box(this.getNameInfo(), longest, character);
-      info += spacer.wrap(place, longest, character);
-      info += spacer.newLine() + spacer.wrap(health, longest, character);
-      info += newLine + spacer.line(longest, character);
+      var getTitleInfo = function () {
+          return spacer.box(title, title.length + 4, "=");
+      };
   
-      info += newLine;
-      info += "  " + this.getItemsInfo();
-      info += newLine;
-      info += spacer.line(longest, character);
-      info += newLine;
+      var getInfo = function () {
+          var infoString = getTitleInfo();
+          infoString += description;
+          infoString += newLine + newLine;
+          infoString += getItemsInfo() + newLine;
+          infoString += getExitsInfo();
+          infoString += spacer.line(40, "=") + newLine;
+          return infoString;
+      };
   
-      return info;
-    }; 
+      this.showInfo = function () {
+          console.log(getInfo());
+      };
   
-    this.showInfo = function (character) {
-      console.log(this.getInfo(character));
+      this.addItem = function (item) {
+          items.push(item);
+      };
+    
+      this.addExit = function (direction, exit) {
+          exits[direction] = exit;
+      };
+  
+      this.getExit = function (direction) {
+          return exits[direction];
+      };
+    
+      this.getLastItem = function () {
+          return items.pop();
+      };
     };
+    
+    // Console update function
+    var render = function () {
+      console.clear();
+      player.getPlace().showInfo();
+      player.showInfo();  
+    };
+    
+    // Create some places
+    var kitchen = new Place(
+      "The Kitchen",
+      "You are in a kitchen. There is a disturbing smell."
+    );
+    var library = new Place(
+      "The Old Library",
+      "You are in a library. Dusty books line the walls."
+    );
+    var garden = new Place(
+      "The Kitchen Garden",
+      "You are in a small, walled garden."
+    );
+    var cupboard = new Place(
+      "The Kitchen Cupboard",
+      "You are in a cupboard. It's surprisingly roomy."
+    );
+  
+    // Add items and exits to places
+    kitchen.addItem("a piece of cheese");
+    library.addItem("a rusty key");
+    cupboard.addItem("a tin of spam");
+  
+    kitchen.addExit("south", library);
+    kitchen.addExit("west", garden);
+    kitchen.addExit("east", cupboard);
+  
+    library.addExit("north", kitchen);
+    garden.addExit("east", kitchen);
+    cupboard.addExit("west", kitchen);
+    
+    // Game initialization
+    var player = new Player("Kandra", 50);
+    player.addItem("The Sword of Doom");
+    player.setPlace(kitchen);
+  
+    render();
+    
+    // Return the public interface
+    return {
+      go: function (direction) {
+        var place = player.getPlace();
+        var destination = place.getExit(direction);
+        player.setPlace(destination);
+        render();
+        return "";
+      },
+  
+      get: function () {
+        var place = player.getPlace();
+        var item = place.getLastItem();
+        player.addItem(item);
+        render();
+        return "";
+      }
+    };
+    
 };
   
-// map
-
-var kitchen = new Place(
-    "The Kitchen",
-    "You are in a kitchen. There is a disturbing smell."
-);
-var library = new Place(
-    "The Old Library",
-    "You are in a library. Dusty books line the walls."
-);
-var garden = new Place(
-    "The Kitchen Garden",
-    "You are in a small, walled garden."
-);
-var cupboard = new Place(
-    "The Kitchen Cupboard",
-    "You are in a cupboard. It's surprisingly roomy."
-);
-
-kitchen.addItem("a piece of cheese");
-library.addItem("a rusty key");
-cupboard.addItem("a tin of spam");
-
-kitchen.addExit("south", library);
-kitchen.addExit("west", garden);
-kitchen.addExit("east", cupboard);
-
-library.addExit("north", kitchen);
-garden.addExit("east", kitchen);
-cupboard.addExit("west", kitchen);
-
-// game
-
-var render = function () {
-    console.clear();
-    player.place.showInfo();
-    player.showInfo("*");
-};
-
-var go = function (direction) {
-    player.place = player.place.exits[direction];
-    render();
-    return "";
-};
-
-var get = function (){
-    var item = player.place.items.pop();
-    player.addItem(item);
-    render();
-    return "";
-};
-
-var player = new Player("Kandra", 50);
-player.addItem("The Sword of Doom");
-player.place = kitchen;
-
-// test
-
-render();
+var game = getGame();
