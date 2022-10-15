@@ -207,17 +207,28 @@ var getGame = function () {
       go: function (direction) {
         var place = player.getPlace();
         var destination = place.getExit(direction);
-        player.setPlace(destination);
-        render();
-        return "";
+        
+        if (destination !== undefined) {
+            player.setPlace(destination);
+            render();
+            return "";
+        } else {
+            return "*** there is no exit in that direction***";
+        }
+
       },
   
       get: function () {
         var place = player.getPlace();
         var item = place.getLastItem();
-        player.addItem(item);
-        render();
-        return "";
+        
+        if (item !== undefined){
+            player.addItem(item);
+            render();
+            return "";
+        } else {
+            return "*** There is no item to get ***";
+        }
       }
     };
     
